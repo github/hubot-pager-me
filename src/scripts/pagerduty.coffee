@@ -140,7 +140,11 @@ module.exports = (robot) ->
     query          = msg.match[3]
     severity       = msg.match[5]
     reason         = msg.match[6]
+    channel        = robot.rooms[hubotUser]
     description    = "#{reason} - @#{fromUserName}"
+
+    if channel
+      description.concat(" in <##{channel.id}|#{channel.name}>")
 
     supportedSeverities = ['critical', 'error', 'warning', 'info']
     if severity not in supportedSeverities
