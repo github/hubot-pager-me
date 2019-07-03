@@ -141,7 +141,7 @@ module.exports = (robot) ->
     severity       = msg.match[5]
     reason         = msg.match[6]
     channel        = msg.message.room
-    description    = "#{reason} - @#{fromUserName} in #{channel.name}"
+    description    = "#{reason} - @#{fromUserName} in #{channel}"
 
     supportedSeverities = ['critical', 'error', 'warning', 'info']
     if severity not in supportedSeverities
