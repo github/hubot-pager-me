@@ -140,7 +140,7 @@ module.exports = (robot) ->
     query          = msg.match[3]
     severity       = msg.match[5]
     reason         = msg.match[6]
-    channel        = msg.message.room
+    channel        = robot.rooms[room_id]
     description    = "#{reason} - @#{fromUserName} in #{channel}"
 
     supportedSeverities = ['critical', 'error', 'warning', 'info']
