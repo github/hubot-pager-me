@@ -168,17 +168,22 @@ module.exports = (robot) ->
 
           return
 
-        headers = {from: triggeredByPagerDutyUserEmail}
+        headers = {from: triggeredByPagerDutyUserEmail}        
 
         if results.service?
           # If we know the service, create incident directly with it...
           # See https://api-reference.pagerduty.com/#!/Incidents/post_incidents
+
+          urgency = "high"
+          # There isn't a way to set severity from this API, so map those to urgencies
+          if severity in ['warning', 'info']
+            urgency = "low"
+
           data = {
             "incident": {
                 "type": "incident",
                 "title": "#{description}",
-                "urgency": "high",
-                "severity": "#{severity}",
+                "urgency": "#{urgency}",
                 "escalation_policy": {
                   "id": "#{results.escalation_policy}",
                   "type": "escalation_policy_reference"
@@ -187,6 +192,7 @@ module.exports = (robot) ->
                 }
             }   
 
+          console.log(data)
           pagerduty.post "/incidents", data, headers, (err, json) ->
             if err?
               robot.emit 'error', err, msg
