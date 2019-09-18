@@ -168,47 +168,72 @@ module.exports = (robot) ->
 
           return
 
-        pagerDutyIntegrationAPI msg, "trigger", query, description, severity, (err, json) ->
+        headers = {from: triggeredByPagerDutyUserEmail}
 
-          if err?
-            robot.emit 'error', err, msg
-            return
+        if results.service?
+          # If we know the service, create incident directly with it...
+          # See https://api-reference.pagerduty.com/#!/Incidents/post_incidents
+          data = {
+            "incident": {
+                "type": "incident",
+                "title": "#{description}",
+                "urgency": "high",
+                "escalation_policy": {
+                  "id": "#{results.escalation_policy}",
+                  "type": "escalation_policy_reference"
+                },
+                "service": results.service
+            }
+          }
 
-          msg.reply ":pager: triggered! now assigning it to the right user..."
+          pagerduty.post "/incidents", data, headers, (err, json) ->
+            if err?
+              robot.emit 'error', err, msg
+              return
+            if json?.incident
+              msg.reply ":pager: created incident #{json.incident.incident_number} assigned to #{results.name}!"
+            else
+              msg.reply "Problem triggering and assigning the incident :/"
+        else
+          pagerDutyIntegrationAPI msg, "trigger", query, description, severity, (err, json) ->
 
-          incidentKey = json.dedup_key
+            if err?
+              robot.emit 'error', err, msg
+              return
 
-          setTimeout () ->
-            pagerduty.get "/incidents", {incident_key: incidentKey}, (err, json) ->
-              if err?
-                robot.emit 'error', err, msg
-                return
+            msg.reply ":pager: triggered! now assigning it to the right user..."
 
-              if json?.incidents.length == 0
-                msg.reply "Couldn't find the incident we just created to reassign. Please try again :/"
-                return
+            incidentKey = json.dedup_key
 
-              incident = json.incidents[0]
-              data = {"type": "incident_reference"}
-
-              if results.assigned_to_user?
-                data['assignments'] = [{"assignee": {"id": results.assigned_to_user, "type": "user_reference"}}]
-              if results.escalation_policy?
-                data['escalation_policy'] = {"id": results.escalation_policy, "type": "escalation_policy_reference"}
-
-              headers = {from: triggeredByPagerDutyUserEmail}
-
-              pagerduty.put "/incidents/#{incident.id}", {'incident': data}, headers, (err, json) ->
+            setTimeout () ->
+              pagerduty.get "/incidents", {incident_key: incidentKey}, (err, json) ->
                 if err?
                   robot.emit 'error', err, msg
                   return
 
-                if not json?.incident
-                  msg.reply "Problem reassigning the incident :/"
+                if json?.incidents.length == 0
+                  msg.reply "Couldn't find the incident we just created to reassign. Please try again :/"
                   return
 
-                msg.reply ":pager: assigned to #{results.name}!"
-          , 7000 # set timeout to 7s. sometimes PagerDuty needs a bit of time for events to propagate as incidents
+                incident = json.incidents[0]
+                data = {"type": "incident_reference"}
+
+                if results.assigned_to_user?
+                  data['assignments'] = [{"assignee": {"id": results.assigned_to_user, "type": "user_reference"}}]
+                if results.escalation_policy?
+                  data['escalation_policy'] = {"id": results.escalation_policy, "type": "escalation_policy_reference"}
+
+                pagerduty.put "/incidents/#{incident.id}", {'incident': data}, headers, (err, json) ->
+                  if err?
+                    robot.emit 'error', err, msg
+                    return
+
+                  if not json?.incident
+                    msg.reply "Problem reassigning the incident :/"
+                    return
+
+                  msg.reply ":pager: assigned to #{results.name}!"
+            , 7000 # set timeout to 7s. sometimes PagerDuty needs a bit of time for events to propagate as incidents
 
   # hubot pager ack <incident> - ack incident #<incident>
   # hubot pager ack <incident1> <incident2> ... <incidentN> - ack all specified incidents
@@ -902,7 +927,10 @@ module.exports = (robot) ->
             cb(error, null)
             return
 
-          cb(null, { escalation_policy: escalationPolicy.id, name: escalationPolicy.name })
+          result = escalation_policy: escalationPolicy.id, name: escalationPolicy.name
+          if escalationPolicy.services?.length > 0
+            result.service = escalationPolicy.services[0]
+          cb(null, result)
           return
 
         oneScheduleMatching msg, string, (schedule) ->
