@@ -168,7 +168,7 @@ module.exports = (robot) ->
 
           return
 
-        headers = {from: triggeredByPagerDutyUserEmail}        
+        headers = {from: triggeredByPagerDutyUserEmail}
 
         if results.service?
           # If we know the service, create incident directly with it...
