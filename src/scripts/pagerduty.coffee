@@ -178,13 +178,14 @@ module.exports = (robot) ->
                 "type": "incident",
                 "title": "#{description}",
                 "urgency": "high",
+                "severity": "#{severity}",
                 "escalation_policy": {
                   "id": "#{results.escalation_policy}",
                   "type": "escalation_policy_reference"
-                },
+                  },
                 "service": results.service
-            }
-          }
+                }
+            }   
 
           pagerduty.post "/incidents", data, headers, (err, json) ->
             if err?
@@ -928,7 +929,8 @@ module.exports = (robot) ->
             return
 
           result = escalation_policy: escalationPolicy.id, name: escalationPolicy.name
-          if escalationPolicy.services?.length > 0
+          if escalationPolicy.services?.length == 1
+            # We pick the service only if it's not ambigious
             result.service = escalationPolicy.services[0]
           cb(null, result)
           return
