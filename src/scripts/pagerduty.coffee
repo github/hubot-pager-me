@@ -192,7 +192,6 @@ module.exports = (robot) ->
                 }
             }   
 
-          console.log(data)
           pagerduty.post "/incidents", data, headers, (err, json) ->
             if err?
               robot.emit 'error', err, msg
