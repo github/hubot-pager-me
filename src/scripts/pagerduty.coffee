@@ -886,7 +886,7 @@ module.exports = (robot) ->
           else
             return 0
 
-        results = results.slice(0, 4).map -> (s)
+        results = results.slice(0, 4).map (s) ->
           # s[0] = damerauLevenshtein score
           # s[1] = actual schedule
           return s[1]
