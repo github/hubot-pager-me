@@ -49,6 +49,8 @@ pagerDutyUserEmail     = process.env.HUBOT_PAGERDUTY_USERNAME
 pagerDutyServiceApiKey = process.env.HUBOT_PAGERDUTY_SERVICE_API_KEY
 pagerDutyEventsAPIURL  = 'https://events.pagerduty.com/v2/enqueue'
 
+damerauLevenshtein = require('talisman/metrics/distance/damerau-levenshtein'
+
 module.exports = (robot) ->
 
   robot.respond /pager( me)?$/i, (msg) ->
@@ -856,6 +858,42 @@ module.exports = (robot) ->
     users.find (user) ->
       user.email == email
 
+
+
+  schedulesSimilarTo = (msg, q, cb) ->
+    query = {
+      query: q
+    }
+
+    results = []
+    pagerduty.getSchedules query, (err, schedules) ->
+      if err?
+        robot.emit 'error', err, msg
+        return
+
+      # Single result returned
+      if schedules?.length == 1
+        results.push schedules[0]
+      else
+        results = schedules.map (s) ->
+          return [damerauLevenshtein(s.name.toLowerCase(), q.toLowerCase()), s]
+
+        results = results.sort (a, b) ->
+          if a[0] > b[0]
+            return 1
+          else if a[0] < b[0]
+            return -1
+          else
+            return 0
+
+        results = results.slice(0, 4).map -> (s)
+          # s[0] = damerauLevenshtein score
+          # s[1] = actual schedule
+          return s[1]
+
+    cb(results)
+
+
   oneScheduleMatching = (msg, q, cb) ->
     query = {
       query: q
@@ -878,12 +916,14 @@ module.exports = (robot) ->
       cb(schedule)
 
   withScheduleMatching = (msg, q, cb) ->
-    oneScheduleMatching msg, q, (schedule) ->
-      if schedule
-        cb(schedule)
+    schedulesSimilarTo msg, q, (schedules) ->
+      if schedules.length == 1
+        cb(schedule[0])
       else
+        names = schedules.map (s) ->
+          return "* " + s.name.toLowerCase()
         # maybe look for a specific name match here?
-        msg.send "I couldn't determine exactly which schedule you meant by #{q}. Can you be more specific?"
+        msg.send "I couldn't determine exactly which schedule you meant by #{q}. Here are the most similar options - can you be more specific?\n#{names.join("\n")}"
         return
 
   reassignmentParametersForUserOrScheduleOrEscalationPolicy = (msg, string, cb) ->
