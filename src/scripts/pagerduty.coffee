@@ -49,7 +49,7 @@ pagerDutyUserEmail     = process.env.HUBOT_PAGERDUTY_USERNAME
 pagerDutyServiceApiKey = process.env.HUBOT_PAGERDUTY_SERVICE_API_KEY
 pagerDutyEventsAPIURL  = 'https://events.pagerduty.com/v2/enqueue'
 
-damerauLevenshtein = require('talisman/metrics/distance/damerau-levenshtein'
+damerauLevenshtein = require('talisman/metrics/distance/damerau-levenshtein')
 
 module.exports = (robot) ->
 
