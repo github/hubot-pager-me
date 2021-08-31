@@ -1187,10 +1187,7 @@ module.exports = (robot) ->
     allChunks
 
   guessSlackHandleFromEmail = (user) ->
-    # Context: https://github.slack.com/archives/C0GNSSLUF/p1539181657000100
-    if user.email == "jp@github.com"
-      "`josh`"
-    else if user.email.search(/github\.com/)
+    if user.email.search(/github\.com/)
       user.email.replace(/(.+)\@github\.com/, '`$1`')
     else
       null
