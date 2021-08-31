@@ -672,13 +672,33 @@ module.exports = (robot) ->
 
     scheduleName = msg.match[4]
 
-    renderSchedule = (s, cb) ->
+    renderScheduleOrEscalationPolicy = (s, cb) ->
+      reassignmentParametersForUserOrScheduleOrEscalationPolicy msg, s, (err, result) ->
+        if err?
+          cb(err)
+          return
+
+        Scrolls.log("info", {at: 'who-is-on-call/renderScheduleOrEscalationPolicy', schedule: result.name, username: user.name})
+
+        if result.escalation_policy?
+          # escalation policy selected
+          if user.name == "hubot" || user.name == undefined
+            cb(null, "No human on call")
+            return
+        else if result.schedule_id? 
+            # schedule selected
+          if user.name == "hubot" || user.name == undefined
+            cb(null, "No human on call")
+            return
+        else
+          pass
+
       withCurrentOncallUser msg, s, (err, user, schedule) ->
         if err?
           cb(err)
           return
 
-        Scrolls.log("info", {at: 'who-is-on-call/renderSchedule', schedule: schedule.name, username: user.name})
+        Scrolls.log("info", {at: 'who-is-on-call/renderScheduleOrEscalationPolicy', schedule: schedule.name, username: user.name})
         if !pagerEnabledForScheduleOrEscalation(schedule) || user.name == "hubot" || user.name == undefined
           cb(null, "No human on call")
           return
@@ -696,16 +716,14 @@ module.exports = (robot) ->
       cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{s.id}|#{s.name}>")
 
     if scheduleName?
-      withScheduleMatching msg, scheduleName, (s) ->
-        renderSchedule s, (err, text) ->
-          if err?
-            robot.emit 'error'
-            return
-          msg.send text
+      renderScheduleOrEscalationPolicy s, (err, text) ->
+        if err?
+          robot.emit 'error'
+          return
+        msg.send text
       return
-    else
-      msg.send "Due to rate limiting please include the schedule name to also see who's on call. E.g. `.who's on call for <schedule>`. Schedule names are being retrieved..."
 
+    msg.send "Due to rate limiting please include the schedule name to also see who's on call. E.g. `.who's on call for <schedule>`. Schedule names are being retrieved..."
     pagerduty.getSchedules (err, schedules) ->
       if err?
         robot.emit 'error', err, msg
@@ -927,7 +945,7 @@ module.exports = (robot) ->
                 cb(err, null)
                 return
 
-              cb(null, { schedule: schedule.id, schedule_name: schedule.name, assigned_to_user: user.id,  name: user.name })
+              cb(null, { schedule_id: schedule.id, schedule_name: schedule.name, assigned_to_user: user.id,  name: user.name })
 
             return
 
