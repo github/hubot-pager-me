@@ -145,7 +145,6 @@ module.exports = (robot) ->
     supportedSeverities = ['critical', 'error', 'warning', 'info']
     if severity not in supportedSeverities
       severity = 'critical'
-
     # Figure out who we are
     campfireUserToPagerDutyUser msg, hubotUser, false, (triggeredByPagerDutyUser) ->
       triggeredByPagerDutyUserEmail = if triggeredByPagerDutyUser?
@@ -664,6 +663,7 @@ module.exports = (robot) ->
 
   # hubot who's on call - return a list of services and who is on call for them
   # hubot who's on call for <schedule> - return the username of who's on call for any schedule matching <search>
+  # hubot who's on call for <escalation policy> - return the username(s) of who's on call for any escalation policy matching <search>
   robot.respond /who(’s|'s|s| is|se)? (on call|oncall|on-call)( (?:for )?(.+))?/i, (msg) ->
     if pagerduty.missingEnvironmentForApi(msg)
       return
@@ -927,7 +927,7 @@ module.exports = (robot) ->
                 cb(err, null)
                 return
 
-              cb(null, { assigned_to_user: user.id,  name: user.name })
+              cb(null, { schedule: schedule.id, schedule_name: schedule.name, assigned_to_user: user.id,  name: user.name })
 
             return
 
