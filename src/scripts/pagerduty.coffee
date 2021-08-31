@@ -707,7 +707,7 @@ module.exports = (robot) ->
 
         slackHandle = guessSlackHandleFromEmail(user)
         slackString = " (#{slackHandle})" if slackHandle
-        cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{schedule.id}|#{schedule.name}'s> oncall is #{user.name}#{slackString}")
+        cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{schedule.id}|#{schedule.name}'s> oncall is @#{user.name} #{slackString}")
 
     renderScheduleNoUser = (s, cb) ->
       Scrolls.log("info", {at: 'who-is-on-call/renderSchedule', schedule: s.name})
