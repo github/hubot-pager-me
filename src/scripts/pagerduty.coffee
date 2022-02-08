@@ -135,7 +135,11 @@ module.exports = (robot) ->
     if pagerduty.missingEnvironmentForApi(msg)
       return
 
-    hubotUser = robot.getUserBySlackUser(msg.message.user)
+    user = msg.message.user
+    if user[0] == "@"
+      user = user.slice(1)
+
+    hubotUser = robot.getUserBySlackUser(user)
     fromUserName   = hubotUser.name
     query          = msg.match[3]
     severity       = msg.match[5]
@@ -691,7 +695,7 @@ module.exports = (robot) ->
       return
 
     msg.send "Retrieving schedules. This may take a few seconds..."
-    
+
     renderSchedule = (s, cb) ->
       withCurrentOncallUser msg, s, (err, user, schedule) ->
         if err?
@@ -951,7 +955,7 @@ module.exports = (robot) ->
       else if schedules.length == 0
         msg.send "No results"
         return
-      else    
+      else
         cb(schedules)
 
   reassignmentParametersForUserOrScheduleOrEscalationPolicy = (msg, string, cb) ->
