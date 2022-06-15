@@ -147,7 +147,7 @@ module.exports = (robot) ->
       severity = 'critical'
 
     if !reason
-      msg.send "Please include a reason for paging, like 'hubot pager @username THE SKYS ARE FALLING!'."
+      msg.send "Please include a reason for paging, like 'hubot pager @username THE SKY IS FALLING!'."
       return
 
     # Deprecate incident commanders
