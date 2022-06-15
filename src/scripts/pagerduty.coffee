@@ -146,9 +146,9 @@ module.exports = (robot) ->
     if severity not in supportedSeverities
       severity = 'critical'
 
-    if not reason:
-        msg.send "Please include a message for paging, like 'hubot pager trigger @username EVERYTHING IS ON FIRE!'."
-        return
+    if !reason
+      msg.send "Please include a reason for paging, like 'hubot pager @username THE SKYS ARE FALLING!'."
+      return
 
     # Deprecate incident commanders
     if query == "incident-commander"
