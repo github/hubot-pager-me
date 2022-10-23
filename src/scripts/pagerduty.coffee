@@ -1248,8 +1248,6 @@ module.exports = (robot) ->
   guessSlackHandleFromEmail = (user) ->
     if not user or not user.email
       return null
-    if user.email == "jp@github.com"
-      return "`josh`"
     if user.email.search(/github\.com/)
       return user.email.replace(/(.+)\@github\.com/, '`$1`')
     return null
