@@ -7,6 +7,7 @@
 #   hubot Am I on call - return if I'm currently on call or not
 #   hubot who's on call - return a list of services and who is on call for them
 #   hubot who's on call for <schedule> - return the username of who's on call for any schedule matching <search>
+#   hubot page <user> [<severity>] <msg> - alias for hubot pager trigger <user> [<severity>] <msg>
 #   hubot pager trigger <user> [<severity>] <msg> - create a new incident with <msg> and assign it to <user>. If specified, <severity> must be one of: critical, error, warning or info. If not specified, <severity> will default to 'critical'.
 #   hubot pager trigger <schedule> [<severity>] <msg> - create a new incident with <msg> and assign it the user currently on call for <schedule>. If specified, <severity> must be one of: critical, error, warning or info. If not specified, <severity> will default to 'critical'.
 #   hubot pager incidents - return the current incidents
@@ -126,7 +127,8 @@ module.exports = (robot) ->
   # hubot pager trigger (no user/schedule)
   robot.respond /(pager|major)( me)? (?:trigger|page) ([\w\-]+)$/i, (msg) ->
     msg.reply "Please include a user or schedule to page, like 'hubot page infrastructure everything is on fire'."
-
+    
+  # hubot page <user> <severity> <msg> - alias for hubot pager trigger <user> <severity> <msg>
   # hubot pager trigger <user> <severity> <msg> - create a new incident with <msg> and assign it to <user>. Severity must be one of: critical, error, warning or info.
   # hubot pager trigger <schedule> <severity> <msg> - create a new incident with <msg> and assign it the user currently on call for <schedule>. Severity must be one of: critical, error, warning or info.
   robot.respond /(?:(pager|major)( me)? (?:trigger|page)|page) (?:@?)([\w\-]+)( (critical|error|warning|info) )?(.+)?$/i, (msg) ->
