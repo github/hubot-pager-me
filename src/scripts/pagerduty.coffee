@@ -689,6 +689,39 @@ module.exports = (robot) ->
         slackString = " (#{slackHandle})" if slackHandle
         cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{schedule.id}|#{schedule.name}'s> oncall is #{user.name}#{slackString}")
 
+    renderMultipleSchedules = (schedules, cb) ->
+      withCurrentOncallUsers msg, schedules, (err, oncalls) ->
+        if err?
+          cb(err)
+          return
+
+        if oncalls is "nobody"
+          result = "No human on call for #{schedules.map(({ name }) => "`#{name}`").join(" and ")}"
+          return cb(null, result)
+
+        sortedOncalls = oncalls.sort (a, b) ->
+          a.schedule.summary.localeCompare b.schedule.summary
+
+        result = ""
+        for oncall in sortedOncalls
+          result = result.concat "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{oncall.schedule.id}|#{oncall.schedule.summary}'s> oncall is #{oncall.user.summary} (`#{oncall.user.summary}`)\n"
+        cb(null, result)
+        return
+
+    renderOneOrMoreSchedules = (s, cb) ->
+      if Array.isArray(s) && s.length > 1
+        renderMultipleSchedules(s, cb)
+      else
+        renderSchedule(s, cb)
+
+    renderScheduleNoUser = (s, cb) ->
+      Scrolls.log("info", {at: 'who-is-on-call/renderSchedule', schedule: s.name})
+      if !pagerEnabledForScheduleOrEscalation(s)
+        cb(null, undefined)
+        return
+
+      cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{s.id}|#{s.name}>")
+
     renderEscalationPolicy = (escalation_policy, cb) ->
        withCurrentOncallUserForEscalation  msg, escalation_policy, (err, user) ->
         if err?
@@ -704,19 +737,11 @@ module.exports = (robot) ->
         slackString = " (#{slackHandle})" if slackHandle
         cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/escalation_policies##{escalation_policy.id}'s> oncall is #{user.name}#{slackString}")
 
-    renderScheduleNoUser = (s, cb) ->
-      Scrolls.log("info", {at: 'who-is-on-call/renderSchedule', schedule: s.name})
-      if !pagerEnabledForScheduleOrEscalation(s)
-        cb(null, undefined)
-        return
-
-      cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{s.id}|#{s.name}>")
-
     scheduleName = msg.match[4]
 
     if scheduleName?
-      withMultipleScheduleMatching msg, scheduleName, (schedules) ->
-        renderMultipleSchedules msg, schedules, (err, text) ->
+      withScheduleMatching msg, scheduleName, true, (schedules) ->
+        renderOneOrMoreSchedules schedules, (err, text) ->
           if err?
             robot.emit 'error'
             return
@@ -921,25 +946,6 @@ module.exports = (robot) ->
 
       cb(schedules)
 
-  renderMultipleSchedules = (msg, schedules, cb) ->
-    withCurrentOncallUsers msg, schedules, (err, oncalls) ->
-      if err?
-        cb(err)
-        return
-
-      if oncalls is "nobody"
-        result = "No human on call for #{schedules.map(({ name }) => "`#{name}`").join(" and ")}"
-        return cb(null, result)
-      
-      sortedOncalls = oncalls.sort (a, b) ->
-        a.schedule.summary.localeCompare b.schedule.summary
-
-      result = ""
-      for oncall in sortedOncalls
-        result = result.concat "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{oncall.schedule.id}|#{oncall.schedule.summary}'s> oncall is #{oncall.user.summary} (`#{oncall.user.summary}`)\n"
-      cb(null, result)
-      return
-
   withScheduleMatching = (msg, q, returnMultipleSchedules, cb) ->
     oneScheduleMatching msg, q, (schedule) ->
       if schedule
@@ -947,12 +953,7 @@ module.exports = (robot) ->
       else
         if returnMultipleSchedules?
           withMultipleScheduleMatching msg, q, (schedules) ->
-            renderMultipleSchedules msg, schedules, (err, text) ->
-              if err?
-                robot.emit 'error'
-                return
-              msg.send text
-          return
+            cb(schedules)
         else
           msg.send "I couldn't determine exactly which schedule you meant by #{q}. Can you be more specific?"
           return
