@@ -730,18 +730,19 @@ module.exports = (robot) ->
           if /No human on call/i.test(text)
             oneEscalationMatching msg, scheduleName, (escalation_policy) ->
               if !escalation_policy
+                msg.send text
                 return
 
               renderEscalationPolicy escalation_policy, (err, escalation_text) ->
                 if err?
                   robot.emit 'error'
+                  msg.send text
                   return
 
-                if escalation_text
-                  msg.send escalation_text
-                  return
-
-          msg.send text
+                msg.send escalation_text || text
+                return
+          else
+            msg.send text
       return
 
     else
