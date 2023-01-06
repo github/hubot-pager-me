@@ -689,6 +689,21 @@ module.exports = (robot) ->
         slackString = " (#{slackHandle})" if slackHandle
         cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{schedule.id}|#{schedule.name}'s> oncall is #{user.name}#{slackString}")
 
+    renderEscalationPolicy = (escalation_policy, cb) ->
+       withCurrentOncallUserForEscalation  msg, escalation_policy, (err, user) ->
+        if err?
+          cb(err)
+          return
+
+        Scrolls.log("info", {at: 'who-is-on-call/renderEscalationPolicy', escalation_policy: escalation_policy.name, username: user.name})
+        if !pagerEnabledForScheduleOrEscalation(escalation_policy) || user.name == "hubot" || user.name == undefined
+          cb(null, null)
+          return
+
+        slackHandle = guessSlackHandleFromEmail(user)
+        slackString = " (#{slackHandle})" if slackHandle
+        cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/escalation_policies##{escalation_policy.id}'s> oncall is #{user.name}#{slackString}")
+
     renderScheduleNoUser = (s, cb) ->
       Scrolls.log("info", {at: 'who-is-on-call/renderSchedule', schedule: s.name})
       if !pagerEnabledForScheduleOrEscalation(s)
@@ -700,11 +715,24 @@ module.exports = (robot) ->
     scheduleName = msg.match[4]
 
     if scheduleName?
-      withScheduleMatching msg, scheduleName, true, (s) ->
-        renderSchedule s, (err, text) ->
+      withMultipleScheduleMatching msg, scheduleName, (schedules) ->
+        renderMultipleSchedules msg, schedules, (err, text) ->
           if err?
             robot.emit 'error'
             return
+          # If no on-calls found, try to find a matching escalation policy
+          if /No human on call/i.test(text)
+            withEscalationMatching msg, scheduleName, (escalation_policy) ->
+              if !escalation_policy
+                return
+              renderEscalationPolicy escalation_policy, (err, escalation_text) ->
+                if err?
+                  robot.emit 'error'
+                  return
+
+                if escalation_text
+                  msg.send escalation_text
+                  return
           msg.send text
       return
 
@@ -939,6 +967,34 @@ module.exports = (robot) ->
         return
       else    
         cb(schedules)
+    
+  oneEscalationMatching = (msg, q, cb) ->
+    query = {
+      query: q
+    }
+    pagerduty.getEscalationPolicies query, (err, escalation_policies) ->
+      if err?
+        robot.emit 'error', err, msg
+        return
+
+      # Single result returned
+      if escalation_policies?.length = 1
+        escalation_policy = escalation_policies[0]
+
+      # Multiple results returned and one is exact (case-insensitive)
+      if escalation_policies?.length > 1
+        matchingExactly = escalation_policies.filter (e) ->
+          e.name.toLowerCase() == q.toLowerCase()
+        if matchingExactly.length == 1
+          escalation_policy = matchingExactly[0]
+      cb(escalation_policy)
+
+  withEscalationMatching = (msg, q, cb) ->
+    oneEscalationMatching msg, q, (escalation_policy) ->
+      if escalation_policy
+        cb(escalation_policy)
+      else
+        cb(null)
 
   reassignmentParametersForUserOrScheduleOrEscalationPolicy = (msg, string, cb) ->
     if campfireUser = robot.brain.userForName(string)
@@ -1059,6 +1115,26 @@ module.exports = (robot) ->
         uniqueOncalls.push(oncall)
 
       cb(null, uniqueOncalls)
+
+  withCurrentOncallUserForEscalation = (msg, escalation_policy, cb) ->
+    query = {
+      escalation_policy_ids: [escalation_policy.id]
+    }
+    pagerduty.getAll "/oncalls", query, "oncalls", (err, oncalls) ->
+      if err?
+        cb(err, null, null)
+        return
+
+      unless oncalls and oncalls.length > 0
+        cb(null, "nobody", escalation_policy)
+        return
+
+      userId = oncalls[0].user.id
+      getPagerDutyUser userId, (err, user) ->
+        if err?
+          cb(err)
+          return
+        cb(null, user, escalation_policy)
 
   getPagerDutyUser = (userId, cb) ->
     pagerduty.get "/users/#{userId}", (err, json) ->
