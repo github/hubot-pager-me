@@ -689,28 +689,9 @@ module.exports = (robot) ->
         slackString = " (#{slackHandle})" if slackHandle
         cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{schedule.id}|#{schedule.name}'s> oncall is #{user.name}#{slackString}")
 
-    renderMultipleSchedules = (schedules, cb) ->
-      withCurrentOncallUsers msg, schedules, (err, oncalls) ->
-        if err?
-          cb(err)
-          return
-
-        if oncalls is "nobody"
-          result = "No human on call for #{schedules.map(({ name }) => "`#{name}`").join(" and ")}"
-          return cb(null, result)
-
-        sortedOncalls = oncalls.sort (a, b) ->
-          a.schedule.summary.localeCompare b.schedule.summary
-
-        result = ""
-        for oncall in sortedOncalls
-          result = result.concat "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{oncall.schedule.id}|#{oncall.schedule.summary}'s> oncall is #{oncall.user.summary} (`#{oncall.user.summary}`)\n"
-        cb(null, result)
-        return
-
     renderOneOrMoreSchedules = (s, cb) ->
       if Array.isArray(s) && s.length > 1
-        renderMultipleSchedules(s, cb)
+        renderMultipleSchedules(msg, s, cb)
       else
         renderSchedule(s, cb)
 
@@ -740,16 +721,17 @@ module.exports = (robot) ->
     scheduleName = msg.match[4]
 
     if scheduleName?
-      withScheduleMatching msg, scheduleName, true, (schedules) ->
-        renderOneOrMoreSchedules schedules, (err, text) ->
+      withScheduleMatching msg, scheduleName, true, (s) ->
+        renderOneOrMoreSchedules s, (err, text) ->
           if err?
             robot.emit 'error'
             return
           # If no on-calls found, try to find a matching escalation policy
           if /No human on call/i.test(text)
-            withEscalationMatching msg, scheduleName, (escalation_policy) ->
+            oneEscalationMatching msg, scheduleName, (escalation_policy) ->
               if !escalation_policy
                 return
+
               renderEscalationPolicy escalation_policy, (err, escalation_text) ->
                 if err?
                   robot.emit 'error'
@@ -758,6 +740,7 @@ module.exports = (robot) ->
                 if escalation_text
                   msg.send escalation_text
                   return
+
           msg.send text
       return
 
@@ -946,6 +929,25 @@ module.exports = (robot) ->
 
       cb(schedules)
 
+  renderMultipleSchedules = (msg, schedules, cb) ->
+    withCurrentOncallUsers msg, schedules, (err, oncalls) ->
+      if err?
+        cb(err)
+        return
+
+      if oncalls is "nobody"
+        result = "No human on call for #{schedules.map(({ name }) => "`#{name}`").join(" and ")}"
+        return cb(null, result)
+
+      sortedOncalls = oncalls.sort (a, b) ->
+        a.schedule.summary.localeCompare b.schedule.summary
+
+      result = ""
+      for oncall in sortedOncalls
+        result = result.concat "• <https://#{pagerduty.subdomain}.pagerduty.com/schedules##{oncall.schedule.id}|#{oncall.schedule.summary}'s> oncall is #{oncall.user.summary} (`#{oncall.user.summary}`)\n"
+      cb(null, result)
+      return
+
   withScheduleMatching = (msg, q, returnMultipleSchedules, cb) ->
     oneScheduleMatching msg, q, (schedule) ->
       if schedule
@@ -989,13 +991,6 @@ module.exports = (robot) ->
         if matchingExactly.length == 1
           escalation_policy = matchingExactly[0]
       cb(escalation_policy)
-
-  withEscalationMatching = (msg, q, cb) ->
-    oneEscalationMatching msg, q, (escalation_policy) ->
-      if escalation_policy
-        cb(escalation_policy)
-      else
-        cb(null)
 
   reassignmentParametersForUserOrScheduleOrEscalationPolicy = (msg, string, cb) ->
     if campfireUser = robot.brain.userForName(string)
