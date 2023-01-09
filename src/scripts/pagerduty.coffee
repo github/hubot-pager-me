@@ -716,7 +716,7 @@ module.exports = (robot) ->
 
         slackHandle = guessSlackHandleFromEmail(user)
         slackString = " (#{slackHandle})" if slackHandle
-        cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/escalation_policies##{escalation_policy.id}'s> oncall is #{user.name}#{slackString}")
+        cb(null, "• <https://#{pagerduty.subdomain}.pagerduty.com/escalation_policies##{escalation_policy.id}|#{escalation_policy.name}'s> oncall is #{user.name}#{slackString}")
 
     scheduleName = msg.match[4]
 
