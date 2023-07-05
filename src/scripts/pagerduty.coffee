@@ -48,6 +48,7 @@ Scrolls = require('../../../../lib/scrolls').context({script: 'pagerduty'})
 pagerDutyUserEmail     = process.env.HUBOT_PAGERDUTY_USERNAME
 pagerDutyServiceApiKey = process.env.HUBOT_PAGERDUTY_SERVICE_API_KEY
 pagerDutyEventsAPIURL  = 'https://events.pagerduty.com/v2/enqueue'
+timezone = 'UTC'
 
 module.exports = (robot) ->
 
