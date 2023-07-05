@@ -414,8 +414,6 @@ module.exports = (robot) ->
       return
     if msg.match[7]
       timezone = msg.match[7]
-    else
-      timezone = 'UTC'
 
     msg.send "Retrieving schedules. This may take a few seconds..."
 
@@ -461,8 +459,6 @@ module.exports = (robot) ->
 
       if msg.match[4]
         timezone = msg.match[4]
-      else
-        timezone = 'UTC'
 
       query = {
         since: moment().format(),
