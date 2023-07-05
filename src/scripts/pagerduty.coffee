@@ -670,7 +670,7 @@ module.exports = (robot) ->
       return
 
     msg.send "Retrieving schedules. This may take a few seconds..."
-    
+
     renderSchedule = (s, cb) ->
       withCurrentOncallUser msg, s, (err, user, schedule) ->
         if err?
@@ -969,9 +969,9 @@ module.exports = (robot) ->
       else if schedules.length == 0
         msg.send "No results"
         return
-      else    
+      else
         cb(schedules)
-    
+
   oneEscalationMatching = (msg, q, cb) ->
     query = {
       query: q
