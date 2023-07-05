@@ -405,8 +405,8 @@ module.exports = (robot) ->
       return
 
     query = {
-      since: moment().format(),
-      until: moment().add(30, 'days').format()
+      since: moment.parseZone().format(),
+      until: moment.parseZone().add(30, 'days').format()
     }
 
     if !msg.match[5]
@@ -443,7 +443,7 @@ module.exports = (robot) ->
           return
 
         sortedEntries = entries.sort (a, b) ->
-          moment(a.start).unix() - moment(b.start).unix()
+          moment.parseZone(a.start).unix() - moment.parseZone(b.start).unix()
 
         msg.send formatOncalls(sortedEntries, timezone)
 
@@ -461,8 +461,8 @@ module.exports = (robot) ->
         timezone = msg.match[4]
 
       query = {
-        since: moment().format(),
-        until: moment().add(30, 'days').format(),
+        since: moment.parseZone().format(),
+        until: moment.parseZone().add(30, 'days').format(),
         user_ids: [user.id]
         include: ['users']
       }
@@ -502,12 +502,12 @@ module.exports = (robot) ->
         unless scheduleId
           return
 
-        unless moment(msg.match[5]).isValid() && moment(msg.match[6]).isValid()
+        unless moment.parseZone(msg.match[5]).isValid() && moment.parseZone(msg.match[6]).isValid()
           msg.send "Please use a http://momentjs.com/ compatible date!"
           return
 
-        start_time = moment(msg.match[5]).format()
-        end_time = moment(msg.match[6]).format()
+        start_time = moment.parseZone(msg.match[5]).format()
+        end_time = moment.parseZone(msg.match[6]).format()
 
         override  = {
           'start':     start_time,
@@ -527,8 +527,8 @@ module.exports = (robot) ->
             msg.send "That didn't work. Check Hubot's logs for an error!"
             return
 
-          start = moment(json.override.start)
-          end = moment(json.override.end)
+          start = moment.parseZone(json.override.start)
+          end = moment.parseZone(json.override.end)
           msg.send "Override setup! #{json.override.user.summary} has the pager from #{start.format()} until #{end.format()}"
 
   # hubot pager override <schedule> delete <id> - delete an override by its ID
@@ -575,9 +575,9 @@ module.exports = (robot) ->
         unless matchingSchedule.id
           return
 
-        start     = moment().format()
+        start     = moment.parseZone().format()
         minutes   = parseInt msg.match[3]
-        end       = moment().add(minutes, 'minutes').format()
+        end       = moment.parseZone().add(minutes, 'minutes').format()
         override  = {
           'start': start,
           'end':   end,
@@ -601,8 +601,8 @@ module.exports = (robot) ->
               msg.send "Something went weird."
               return
 
-            start = moment(json.override.start)
-            end = moment(json.override.end)
+            start = moment.parseZone(json.override.start)
+            end = moment.parseZone(json.override.end)
             getPagerDutyUser userId, (err, user) ->
               if err?
                 robot.emit 'error', err, msg
@@ -805,8 +805,8 @@ module.exports = (robot) ->
 
       minutes = msg.match[3]
       service_ids = msg.match[4].split(' ')
-      start_time = moment().format()
-      end_time = moment().add(minutes, 'minutes').format()
+      start_time = moment.parseZone().format()
+      end_time = moment.parseZone().add(minutes, 'minutes').format()
 
       maintenance_window = {
         'start_time': start_time,
@@ -1058,8 +1058,8 @@ module.exports = (robot) ->
       cb(null, user.id, user.name, s)
 
   withCurrentOncallUser = (msg, schedule, cb) ->
-    oneHour = moment().add(1, 'hours').format()
-    now = moment().format()
+    oneHour = moment.parseZone().add(1, 'hours').format()
+    now = moment.parseZone().format()
 
     query = {
       since: now,
@@ -1083,8 +1083,8 @@ module.exports = (robot) ->
         cb(null, user, schedule)
 
   withCurrentOncallUsers = (msg, schedules, cb) ->
-    oneHour = moment().add(1, 'hours').format()
-    now = moment().format()
+    oneHour = moment.parseZone().add(1, 'hours').format()
+    now = moment.parseZone().format()
 
     scheduleIds = schedules.map (s) -> s.id
     query = {
@@ -1286,8 +1286,8 @@ module.exports = (robot) ->
     buffer = ""
     schedules = {}
     for oncall in oncalls
-      startTime = moment(oncall.start).tz(timezone).format()
-      endTime   = moment(oncall.end).tz(timezone).format()
+      startTime = moment.parseZone(oncall.start).tz(timezone).format()
+      endTime   = moment.parseZone(oncall.end).tz(timezone).format()
       time      = "#{startTime} - #{endTime}"
       username  = guessSlackHandleFromEmail(oncall.user) || oncall.user.summary
       if oncall.schedule?
