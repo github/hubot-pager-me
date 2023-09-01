@@ -174,9 +174,11 @@ module.exports = (robot) ->
           return
 
         pagerDutyIntegrationAPI msg, "trigger", query, description, severity, (err, json) ->
-
           if err?
             robot.emit 'error', err, msg
+            return
+          if query == "Deploys Team" || "deploys"
+            msg.reply "Please use the '/pd trigger' command in Slack to page the Deploys team."
             return
 
           msg.reply ":pager: triggered! now assigning it to the right user..."
