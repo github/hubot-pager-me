@@ -1,0 +1,46 @@
+name: 🚲 Batch template
+description: Tracking issue for batches.
+title: "[Batch] "
+labels: ["batch"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: "one or two human readable sentences describing the batch, short and 🍭"
+    validations:
+      required: true
+  - type: textarea
+    id: team
+    attributes:
+      label: Team
+      description: Who is responsible?
+      value: |
+        <!-- issue-fields start -->
+        | Role & Responsibility | Username | 
+        |--|--|
+        | DRI | @username |
+        <!-- issue-fields end -->
+  - type: textarea
+    id: corresponding
+    attributes:
+      label: Corresponding Work
+      description: "Add Tasks that ladder up to this batch"
+      value: |
+        ```[tasklist]
+        - [ ] ... ?
+        - [ ] ... ?
+        ```
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: "list of known dependencies to complete this work"
+      value: |
+        - [ ] ... ?
+        - [ ] ... ?
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Supporting Documentation
+      description: "Links to documents, spreadsheets, issues, etc."

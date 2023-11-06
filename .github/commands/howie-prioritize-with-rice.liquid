@@ -1,0 +1,43 @@
+### Howie triage
+
+Based on our triage process we've assigned this issue the following priority (0 is high; 5 is low):
+
+{%- liquid
+assign priority = 5
+if data.reach == "High reach"
+  capture priority
+  echo priority | minus:1
+  endcapture
+endif
+if data.impact == "High impact"
+  capture priority
+  echo priority | minus:2
+  endcapture
+endif
+if data.impact == "Medium impact"
+  capture priority
+  echo priority | minus:1
+  endcapture
+endif
+if data.confidence == "High confidence"
+  capture priority
+  echo priority | minus:1
+  endcapture
+endif
+if data.effort == "Low effort"
+  capture priority
+  echo priority | minus:1
+  endcapture
+endif %}
+
+| Reach     | Impact     | Confidence      | Effort     | **Final Priority** |
+|-----------|------------|-----------------|------------|--------------------|
+| {{ data.reach }} | {{ data.impact }} | {{ data.confidence }} | {{data.effort}} | **priority-{{ priority }}**     |
+
+If you have additional details that could change this issue's priority, please follow up here so we can revisit.
+
+{%- capture command %}
+<!-- gh issue add-labels="priority-{{priority}}" -->
+
+{%- endcapture %}
+{{ command | escape }}

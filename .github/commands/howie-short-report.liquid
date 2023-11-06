@@ -1,0 +1,35 @@
+{% capture form -%}
+### Trending
+
+<!-- data key="trending" start -->
+{{ data.trending }}
+<!-- data end -->
+{% unless data.target_date == blank %}
+### Target date
+
+<!-- data key="target_date" start -->
+{{ data.target_date }}
+<!-- data end -->
+{% endunless -%}
+{% unless data.update == blank %}
+### Update
+
+<!-- data key="update" start -->
+{{ data.update }}
+<!-- data end -->
+{% endunless %}
+{% unless data.summary == blank %}
+### Summary
+
+<!-- data key="summary" start -->
+{{ data.summary }}
+<!-- data end -->
+{% endunless %}
+
+<!-- data key="isReport" value="true" -->
+<!-- data key="howieReportName" value="short" -->
+
+{% endcapture %}
+{{ form | escape }}
+
+%cursor%

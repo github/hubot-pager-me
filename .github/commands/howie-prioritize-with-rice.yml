@@ -1,0 +1,34 @@
+---
+trigger: rice
+title: Prioritize with RICE
+description: Triage an incoming issue with the RICE scoring system
+surfaces:
+  - issue
+steps:
+  - type: menu
+    id: reach
+    label: Reach
+    options:
+      - Low reach
+      - High reach
+  - type: menu
+    id: impact
+    label: Impact
+    options:
+      - Low impact
+      - Medium impact
+      - High impact
+  - type: menu
+    id: confidence
+    label: Confidence
+    options:
+      - High confidence
+      - Low confidence
+  - type: menu
+    id: effort
+    label: Effort
+    options:
+      - Low effort
+      - High effort
+  - type: fill
+    template_path: .github/commands/howie-prioritize-with-rice.liquid

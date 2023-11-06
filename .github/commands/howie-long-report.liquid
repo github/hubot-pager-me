@@ -1,0 +1,58 @@
+{% capture form -%}
+### Trending
+
+<!-- data key="trending" start -->
+{{ data.trending }}
+<!-- data end -->
+{% unless data.target_date == blank %}
+### Target date
+
+<!-- data key="target_date" start -->
+{{ data.target_date }}
+<!-- data end -->
+{% endunless -%}
+{% unless data.this_week_section == blank %}
+### This Week
+
+<!-- data key="this_week" start -->
+{{ data.this_week_section }}
+<!-- data end -->
+{% endunless -%}
+{% unless data.next_week_section == blank %}
+### Next Week
+
+<!-- data key="next_week" start -->
+{{ data.next_week_section }}
+<!-- data end -->
+{% endunless -%}
+{% unless data.risks_and_mitigations_section == blank %}
+### Risks and Mitigations
+
+<!-- data key="risks_mitigations" start -->
+{{ data.risks_and_mitigations_section }}
+<!-- data end -->
+{% endunless -%}
+{%- unless data.demos_section == blank %}
+### Demos
+
+<!-- data key="demos" start -->
+{{ data.demos_section }}
+<!-- data end -->
+{% endunless %}
+{% unless data.summary == blank %}
+### Summary
+
+<!-- data key="summary" start -->
+{{ data.summary }}
+<!-- data end -->
+{% endunless %}
+
+<!-- data key="isReport" value="true" -->
+<!-- data key="howieReportName" value="long" -->
+
+{% endcapture %}
+{{ form | escape }}
+
+
+
+%cursor%

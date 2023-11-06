@@ -1,0 +1,62 @@
+---
+trigger: long
+title: Long Report
+description: Howie detailed Progress Report
+surfaces:
+  - issue
+steps:
+  - type: form
+    style: embedded
+    actions:
+      submit: Submit
+    body:
+      - type: dropdown
+        attributes:
+          id: trending
+          label: Trending
+          options:
+            - label: "🟢 on track"
+              value: "🟢 on track"
+            - label: "🟡 at risk"
+              value: "🟡 at risk"
+            - label: "🔴 off track"
+              value: "🔴 off track"
+            - label: "⚪ inactive"
+              value: "⚪ inactive"
+            - label: "⚪ not planned"
+              value: "⚪ not planned"
+            - label: "🟣 done"
+              value: "🟣 done"
+      - type: input
+        attributes:
+          id: target_date
+          label: Target date
+          format: date
+      - type: textarea
+        attributes:
+          id: this_week_section
+          label: Work done this week
+          placeholder: Key updates and insights.
+      - type: textarea
+        attributes:
+          id: next_week_section
+          label: Work planned next
+          placeholder: Plans and anticipated ships.
+      - type: textarea
+        attributes:
+          id: risks_and_mitigations_section
+          label: Risks and mitigations
+          placeholder: Blockers and next steps.
+      - type: textarea
+        attributes:
+          id: demos_section
+          label: Demos
+          placeholder: Screen recordings demoing new features and improvements. Or screen recordings walking developers through key aspects of your work.
+      - type: input
+        attributes:
+          id: summary
+          label: Summary
+          placeholder: A 1-3 sentence summary of the update. Try to keep this brief and meaningful as it will be used in rollup reporting.
+  - type: fill
+    submit_form: true
+    template_path: .github/commands/howie-long-report.liquid

@@ -1,0 +1,47 @@
+---
+trigger: short
+title: Short Report
+description: Howie Short Progress Report
+surfaces:
+  - issue
+steps:
+  - type: form
+    style: embedded
+    actions:
+      submit: Submit
+    body:
+      - type: dropdown
+        attributes:
+          id: trending
+          label: Trending
+          options:
+            - label: "🟢 on track"
+              value: "🟢 on track"
+            - label: "🟡 at risk"
+              value: "🟡 at risk"
+            - label: "🔴 off track"
+              value: "🔴 off track"
+            - label: "⚪ inactive"
+              value: "⚪ inactive"
+            - label: "⚪ not planned"
+              value: "⚪ not planned"
+            - label: "🟣 done"
+              value: "🟣 done"
+      - type: input
+        attributes:
+          id: target_date
+          label: Target date
+          format: date
+      - type: textarea
+        attributes:
+          id: update
+          label: Update
+          placeholder: A few words on how it's going
+      - type: input
+        attributes:
+          id: summary
+          label: Summary
+          placeholder: A 1-3 sentence summary of the update. Try to keep this brief and meaningful as it will be used in rollup reporting.
+  - type: fill
+    submit_form: true
+    template_path: .github/commands/howie-short-report.liquid

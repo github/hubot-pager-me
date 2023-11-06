@@ -1,0 +1,89 @@
+name: 🏎️ Initiative template
+description: Tracking issue for initiatives.
+title: "[Initiative] "
+labels: ["initiative"]
+body:
+  - type: textarea
+    id: introduction
+    attributes:
+      label: Introduction
+      description: "TL;DR — one or two sentences describing this initiative."
+    validations:
+      required: true
+  - type: textarea
+    id: objectives
+    attributes:
+      label: Objectives
+      description: "What is the problem you are trying to solve with this Initiative? What does this Initiative accomplish?"
+  - type: textarea
+    id: team
+    attributes:
+      label: Team
+      description: Who is responsible?
+      value: |
+        <!-- issue-fields start -->
+        | Role & Responsibility | Username(s) |
+        |--|--|
+        | DRI | @username |
+        | Engineering | @username(s) |
+        | Product | @username(s) |
+        | Design | @username(s) |
+        | TPM | @username(s) |
+        | Others | @username(s) |
+        <!-- issue-fields end -->
+  - type: textarea
+    id: dri-resp
+    attributes:
+      label: DRI Responsibilities
+      value: |
+        - Provide bi-weekly status updates on area deliverables to keep all stakeholders in the loop by typing /initiative in the comment box below
+        - Read more about the DRI expectations [here](https://thehub.github.com/github/how-we-work-dri/)
+  - type: textarea
+    id: team-resp
+    attributes:
+      label: Team Responsibilities
+      value: |
+        - Provide visibility to work / deliverables that the workstream will deliver for the initiative
+        - Identify cross-functional dependencies
+  - type: textarea
+    id: krs
+    attributes:
+      label: Key Results (KRs)
+      description: "List KRs here."
+      value: |
+        - ...?
+        - ...?
+  - type: textarea
+    id: dates
+    attributes:
+      label: Important Dates
+      description: "Kickoff, design handoff to engineering, campaign launch, product launch, etc."
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & Dependencies
+      description: "List of known risks & dependencies to complete this work."
+  - type: textarea
+    id: corresponding
+    attributes:
+      label: Corresponding Work
+      description: "Add Epics (or Batches when no Epics are available) that ladder up to this initiative."
+      value: |
+        ```[tasklist]
+        - [ ] ... ?
+        - [ ] ... ?
+        ```
+  - type: textarea
+    id: comms
+    attributes:
+      label: Communication Plan
+      description: "/initiative status updates in the comments on this issue should serve as the source of truth. But the following are places where additional communication will take place."
+      value: |
+        - Discussions:
+        - Slack channel: #
+        - Regular Meetings:
+  - type: textarea
+    id: library
+    attributes:
+      label: 📚 Library of Resources
+      description: "Links to relevant documents, spreadsheets, issues, discussions, etc."
