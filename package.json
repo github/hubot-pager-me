@@ -11,10 +11,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-pager-me.git"
+    "url": "git://github.com/hubot-archive/hubot-pager-me.git"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-pager-me/issues"
+    "url": "https://github.com/hubot-archive/hubot-pager-me/issues"
   },
   "dependencies": {
     "@cypress/request": "^3.0.1",
